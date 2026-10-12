@@ -6,13 +6,12 @@
 **GitHub Repository:** [thebeancheese/303apparel-store](https://github.com/thebeancheese/303apparel-store)
 
 ## Authors
-
-- Vince Raiezen M. Cruzada
-- Clarence Matthew F. Yabut
-- Emilson Lio F. Madla
-- John Paul S. David
-- Erinne Karl Gabriel D. Sicat
 - Manjot Chamdal
+- Vince Raiezen M. Cruzada
+- John Paul S. David
+- Emilson Lio F. Madla
+- Erinne Karl Gabriel D. Sicat
+- Clarence Matthew F. Yabut
 
 ## Features
 
