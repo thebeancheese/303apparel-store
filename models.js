@@ -47,4 +47,8 @@ const Promo = mongoose.model('Promo', new Schema({
   validUntil: String
 }, { versionKey: false }));
 
-module.exports = { Product, Customer, Order, Message, Promo };
+const Subscriber = mongoose.model('Subscriber', new Schema({
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true }
+}, { timestamps: true, versionKey: false }));
+
+module.exports = { Product, Customer, Order, Message, Promo, Subscriber };
