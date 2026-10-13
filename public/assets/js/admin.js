@@ -20,10 +20,18 @@
 
   $$('[data-tab]').forEach(b => b.addEventListener('click', () => {
     $$('[data-tab]').forEach(x => x.setAttribute('aria-pressed', x === b));
-    ['products', 'customers', 'messages'].forEach(t => $('#tab-' + t).hidden = t !== b.dataset.tab);
+    ['products', 'customers', 'messages', 'subscribers'].forEach(t => $('#tab-' + t).hidden = t !== b.dataset.tab);
     if (b.dataset.tab === 'customers') loadCustomers();
     if (b.dataset.tab === 'messages') loadMessages();
+    if (b.dataset.tab === 'subscribers') loadSubscribers();
   }));
+
+  /* ---- newsletter subscribers ---- */
+  async function loadSubscribers() {
+    const list = await window.Store.listSubscribers();
+    $('#subCount').textContent = `${list.length} subscriber${list.length === 1 ? '' : 's'}`;
+    $('#subBody').innerHTML = list.map(s => `<tr><td>${esc(s.email)}</td><td>${esc(String(s.createdAt).slice(0, 10))}</td></tr>`).join('') || '<tr><td colspan="2">No subscribers yet.</td></tr>';
+  }
 
   /* ---- products ---- */
   let products = [];
