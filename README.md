@@ -156,3 +156,12 @@ Live site: **https://three03apparel-store.onrender.com**
 - Keep `.env`, database credentials, and administrator secrets out of the repository.
 - Store-specific contact details and social links should be reviewed before production use if they are still placeholders.
 - The promotional code **15-0FF** was originally configured for 15% off through **October 15, 2026**; current offers are controlled by the store's promo settings.
+
+
+## V10 additions
+- **Size guide** in the product dialog, with a chart per category (tops, outerwear, sets, kids). Edit the numbers in `GUIDE`
+  inside `public/assets/js/extras.js`.
+- **You may also like**: three related products at the bottom of the product dialog. Uses the existing products API only.
+- **FAQ** at `contact.html#faq`, linked in the footer.
+- **Newsletter signup** on the Home and Contact pages. Emails are saved in MongoDB through `POST /api/subscribers`
+  (new `Subscriber` model in `models.js`); staff see them in Admin > Subscribers (`GET /api/subscribers`, admin key required).
