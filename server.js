@@ -4,7 +4,7 @@ const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
 const mongoose = require('mongoose');
-const { Product, Customer, Order, Message, Promo } = require('./models');
+const { Product, Customer, Order, Message, Promo, Subscriber } = require('./models');
 const { seed } = require('./seed');
 
 const { MONGODB_URI, ADMIN_KEY } = process.env;
@@ -183,6 +183,19 @@ app.post('/api/messages', wrap(async (req, res) => {
 app.get('/api/messages', requireAdmin, wrap(async (req, res) => {
   const list = await Message.find().sort({ createdAt: -1 });
   res.json(list.map(d => ({ id: String(d._id), ...d.toObject(), _id: undefined })));
+}));
+
+/* ---------- newsletter ---------- */
+app.post('/api/subscribers', wrap(async (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new HttpError(400, 'Enter a valid email address.');
+  const r = await Subscriber.updateOne({ email }, { $setOnInsert: { email } }, { upsert: true });
+  res.status(201).json({ ok: true, already: r.upsertedCount === 0 });
+}));
+
+app.get('/api/subscribers', requireAdmin, wrap(async (req, res) => {
+  const list = await Subscriber.find().sort({ createdAt: -1 });
+  res.json(list.map(d => ({ email: d.email, createdAt: d.createdAt })));
 }));
 
 /* ---------- static site, 404, errors ---------- */
