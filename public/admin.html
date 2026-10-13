@@ -34,6 +34,7 @@
       <button class="chip" role="tab" type="button" data-tab="products" aria-pressed="true">Products</button>
       <button class="chip" role="tab" type="button" data-tab="customers" aria-pressed="false">Customers</button>
       <button class="chip" role="tab" type="button" data-tab="messages" aria-pressed="false">Messages</button>
+      <button class="chip" role="tab" type="button" data-tab="subscribers" aria-pressed="false">Subscribers</button>
     </div>
 
     <div id="tab-products" class="adm-grid">
@@ -72,6 +73,11 @@
     <div id="tab-messages" hidden>
       <p class="msg" id="msgCount"></p>
       <div class="tablewrap"><table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Subject</th><th>Message</th></tr></thead><tbody id="msgBody"></tbody></table></div>
+    </div>
+
+    <div id="tab-subscribers" hidden>
+      <p class="msg" id="subCount"></p>
+      <div class="tablewrap"><table><thead><tr><th>Email</th><th>Subscribed</th></tr></thead><tbody id="subBody"></tbody></table></div>
     </div>
   </section>
 </div></main>
