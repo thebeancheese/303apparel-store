@@ -41,12 +41,20 @@
         <button class="cartbtn" id="openCart" type="button" aria-label="Open cart">${ICON.bag}<span class="count" id="cartCount" data-n="0">0</span></button>
       </div></header>`);
     document.body.insertAdjacentHTML('beforeend', `
+      ${['home', 'contact'].includes(page) ? `<section class="newsletter" aria-labelledby="nlTitle"><div class="wrap">
+        <div><h2 id="nlTitle">Join the drop list</h2><p>Be first to hear about new drops and members-only promo codes. No spam, unsubscribe anytime.</p></div>
+        <form id="nlForm" novalidate>
+          <label class="sr" for="nlEmail">Email address</label>
+          <input id="nlEmail" type="email" placeholder="you@email.com" autocomplete="email" required>
+          <button class="btn" type="submit">Subscribe</button>
+          <p class="msg" id="nlMsg" role="status"></p>
+        </form></div></section>` : ''}
       <section class="brandline">
         <h2>Don’t follow the trend, set it.</h2><p>${esc(c.name)}</p><p><em>Stay Ahead of the Trend.</em></p>
         <ul class="social" aria-label="Social media">${socialLinks()}</ul>
       </section>
       <footer class="legal">
-        <nav aria-label="Footer">${PAGES.map(([, href, label]) => `<a href="${href}">${label}</a>`).join('')}<a href="admin.html">Staff login</a></nav>
+        <nav aria-label="Footer">${PAGES.map(([, href, label]) => `<a href="${href}">${label}</a>`).join('')}<a href="contact.html#faq">FAQ</a><a href="admin.html">Staff login</a></nav>
         <address>${(c.address || []).map(esc).join('<br>')}</address>
         <small>© ${new Date().getFullYear()} ${esc(c.name)}. All rights reserved.</small>
         <p class="madeby">Created with Love by: M. Chamdal | V.M. Cruzada | J.P. David | E.L. Madla | E.K. Sicat | C.M. Yabut</p>
@@ -75,8 +83,12 @@
         <div class="pd-body">
           <h2 id="pdName"></h2><p class="cat" id="pdCat"></p><p class="price" id="pdPrice"></p><p class="desc" id="pdDesc"></p><p class="avail" id="pdAvail"></p>
           <fieldset><legend>Size</legend><div class="sizes" id="pdSizes"></div></fieldset>
+          <details class="sizeguide" id="pdGuide"><summary>Size guide</summary><div id="pdGuideBody"></div></details>
           <div><p class="sr" id="qtyLabel">Quantity</p><div class="qty" role="group" aria-labelledby="qtyLabel"><button type="button" id="pdMinus" aria-label="Decrease quantity">−</button><output id="pdQty">1</output><button type="button" id="pdPlus" aria-label="Increase quantity">+</button></div></div>
           <div class="btns"><button class="btn" type="button" id="pdOrder">Order now</button><button class="btn ghost" type="button" id="pdAdd">Add to cart</button></div>
+        </div>
+        <div class="pd-more">
+          <section class="pd-related" id="pdRelatedBox" aria-labelledby="pdRelTitle"><h3 id="pdRelTitle">You may also like</h3><ul class="related" id="pdRelated"></ul></section>
         </div></div></dialog>
 
       <dialog id="lbDialog" class="lb" aria-label="Image viewer">
@@ -112,6 +124,7 @@
   /* ---------- product cards ---------- */
   const registry = new Map();
   const availability = p => (p.stock ?? 0) <= 0 ? { text: 'Sold out', low: true } : p.stock <= 5 ? { text: `Only ${p.stock} left`, low: true } : { text: 'In stock', low: false };
+  const X = () => window.EXTRAS || null;
   function productCard(p) {
     registry.set(p.id, p);
     const a = availability(p);
@@ -144,7 +157,26 @@
     $('#pdSizes').innerHTML = SIZES.map(s => `<label><input type="radio" name="size" value="${s}" ${s === 'M' ? 'checked' : ''}><span>${s}</span></label>`).join('');
     $('#pdQty').textContent = 1;
     $('#pdAdd').disabled = $('#pdOrder').disabled = (p.stock ?? 0) <= 0;
-    $('#pdDialog').showModal();
+    const x = X();
+    if (x) {
+      $('#pdGuide').open = false; $('#pdGuideBody').innerHTML = x.sizeGuideHTML(p.category);
+    }
+    renderRelated(p);
+    if (!$('#pdDialog').open) $('#pdDialog').showModal();
+    $('#pdDialog').scrollTop = 0;
+  }
+  /* "You may also like": same category first, then fill with other products */
+  async function renderRelated(p) {
+    const box = $('#pdRelatedBox'), ul = $('#pdRelated');
+    try {
+      const { items } = await window.Store.listProducts({});
+      const others = items.filter(o => o.id !== p.id);
+      const rel = [...others.filter(o => o.category === p.category), ...others.filter(o => o.category !== p.category)].slice(0, 3);
+      if (pd.p !== p) return;                       // another product was opened meanwhile
+      rel.forEach(o => registry.set(o.id, o));
+      box.hidden = !rel.length;
+      ul.innerHTML = rel.map(o => `<li><button type="button" data-open="${esc(o.id)}" aria-label="View ${esc(o.name)}"><img src="${esc(o.images[0])}" alt="" loading="lazy"><span class="rn">${esc(o.name)}</span><span class="rp">${peso(o.price)}</span></button></li>`).join('');
+    } catch (e) { box.hidden = true; }
   }
 
   /* ---------- cart ---------- */
@@ -256,6 +288,17 @@
       btn.disabled = false;
     });
     $('#doneBtn').addEventListener('click', () => $('#coDialog').close());
+    if ($('#nlForm')) $('#nlForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const msg = $('#nlMsg'), btn = e.target.querySelector('button'); btn.disabled = true;
+      try {
+        const r = await window.Store.subscribe($('#nlEmail').value);
+        msg.className = 'msg ok';
+        msg.textContent = r.already ? 'You are already on the list. See you in your inbox!' : 'You are in! Watch your inbox for the next drop.';
+        if (!r.already) e.target.reset();
+      } catch (err) { msg.className = 'msg err'; msg.textContent = err.message; }
+      btn.disabled = false;
+    });
   }
 
   /* ---------- scroll reveal ---------- */
