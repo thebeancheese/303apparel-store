@@ -50,7 +50,11 @@
 
     /* ---- contact messages ---- */
     addMessage(msg) { return api('/messages', { method: 'POST', body: msg }); },
-    listMessages() { return api('/messages', { admin: true }); }
+    listMessages() { return api('/messages', { admin: true }); },
+
+    /* ---- newsletter ---- */
+    subscribe(email) { return api('/subscribers', { method: 'POST', body: { email } }); },
+    listSubscribers() { return api('/subscribers', { admin: true }); }
   };
 
   window.Store = Store;
